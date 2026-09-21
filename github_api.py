@@ -1,4 +1,5 @@
 import requests
+from data_processor import commits_to_dataframe
 
 GITHUB_API_URL = "https://api.github.com"
 
@@ -34,7 +35,10 @@ def get_commits(owner, repo, per_page=30):
 
 
 if __name__ == "__main__":
-    data = get_repository("pandas-dev", "pandas")
+    owner = "pandas-dev"
+    repo = "pandas"
+
+    data = get_repository(owner, repo)
 
     print("Repository:", data["full_name"])
     print("Description:", data["description"])
@@ -43,7 +47,7 @@ if __name__ == "__main__":
     print("Open Issues:", data["open_issues_count"])
     print("Language:", data["language"])
 
-    commits = get_commits("pandas-dev", "pandas")
+    commits = get_commits(owner, repo)
 
     print("\nRecent Commits:")
 
@@ -53,3 +57,8 @@ if __name__ == "__main__":
         date = commit["commit"]["author"]["date"]
 
         print(f"- {date} | {author} | {message}")
+
+    df = commits_to_dataframe(commits)
+
+    print("\nCommit DataFrame:")
+    print(df.head())
