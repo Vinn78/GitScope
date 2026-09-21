@@ -16,6 +16,23 @@ def get_repository(owner, repo):
     return response.json()
 
 
+def get_commits(owner, repo, per_page=30):
+    url = f"{GITHUB_API_URL}/repos/{owner}/{repo}/commits"
+
+    params = {
+        "per_page": per_page
+    }
+
+    response = requests.get(url, params=params)
+
+    if response.status_code != 200:
+        raise Exception(
+            f"GitHub API error: {response.status_code} - {response.text}"
+        )
+
+    return response.json()
+
+
 if __name__ == "__main__":
     data = get_repository("pandas-dev", "pandas")
 
@@ -25,3 +42,14 @@ if __name__ == "__main__":
     print("Forks:", data["forks_count"])
     print("Open Issues:", data["open_issues_count"])
     print("Language:", data["language"])
+
+    commits = get_commits("pandas-dev", "pandas")
+
+    print("\nRecent Commits:")
+
+    for commit in commits[:5]:
+        message = commit["commit"]["message"].split("\n")[0]
+        author = commit["commit"]["author"]["name"]
+        date = commit["commit"]["author"]["date"]
+
+        print(f"- {date} | {author} | {message}")
