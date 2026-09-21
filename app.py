@@ -22,6 +22,7 @@ st.set_page_config(
 # ==============================
 
 def parse_github_url(url):
+
     pattern = (
         r"https?://github\.com/"
         r"([^/\s]+)/([^/\s]+)"
@@ -43,6 +44,7 @@ def parse_github_url(url):
 
 
 def format_percentage(value):
+
     return f"{value:.2f}%"
 
 
@@ -92,6 +94,7 @@ selected_analyses = st.multiselect(
     analysis_options
 )
 
+
 analyze_button = st.button(
     "Analyze Selected",
     type="primary"
@@ -112,9 +115,11 @@ if analyze_button:
 
         st.stop()
 
+
     owner, repo = parse_github_url(
         repository_url
     )
+
 
     if not owner or not repo:
 
@@ -126,6 +131,7 @@ if analyze_button:
 
         st.stop()
 
+
     if not selected_analyses:
 
         st.warning(
@@ -133,6 +139,7 @@ if analyze_button:
         )
 
         st.stop()
+
 
     try:
 
@@ -142,12 +149,15 @@ if analyze_button:
 
             analysis = analyze_repository(
                 owner,
-                repo
+                repo,
+                selected_analyses
             )
+
 
         st.success(
             "Repository analysis completed successfully."
         )
+
 
     except Exception as error:
 
@@ -156,6 +166,7 @@ if analyze_button:
         )
 
         st.stop()
+
 
     repository = analysis["repository"]
 
@@ -168,7 +179,9 @@ if analyze_button:
 
     col1, col2, col3, col4 = st.columns(4)
 
+
     with col1:
+
         st.metric(
             "Stars",
             repository.get(
@@ -177,7 +190,9 @@ if analyze_button:
             )
         )
 
+
     with col2:
+
         st.metric(
             "Forks",
             repository.get(
@@ -186,7 +201,9 @@ if analyze_button:
             )
         )
 
+
     with col3:
+
         st.metric(
             "Open Issues",
             repository.get(
@@ -195,7 +212,9 @@ if analyze_button:
             )
         )
 
+
     with col4:
+
         st.metric(
             "Primary Language",
             repository.get(
@@ -203,15 +222,18 @@ if analyze_button:
             ) or "N/A"
         )
 
+
     st.write(
         f"**Repository:** "
         f"{repository.get('full_name', 'N/A')}"
     )
 
+
     st.write(
         f"**Description:** "
         f"{repository.get('description') or 'No description available.'}"
     )
+
 
     st.write(
         f"**Default Branch:** "
@@ -235,9 +257,12 @@ if analyze_button:
             "commit_activity_trend"
         ]
 
+
         col1, col2, col3 = st.columns(3)
 
+
         with col1:
+
             st.metric(
                 "Total Commits",
                 commit_metrics[
@@ -245,7 +270,9 @@ if analyze_button:
                 ]
             )
 
+
         with col2:
+
             st.metric(
                 "Unique Contributors",
                 commit_metrics[
@@ -253,17 +280,22 @@ if analyze_button:
                 ]
             )
 
+
         with col3:
+
             st.metric(
                 "Avg Commits / Day",
                 f"{commit_metrics['average_commits_per_day']:.2f}"
             )
 
+
         st.subheader(
             "Commit Activity Trend"
         )
 
+
         trend_col1, trend_col2 = st.columns(2)
+
 
         with trend_col1:
 
@@ -282,6 +314,7 @@ if analyze_button:
                 f"{activity_metrics['active_days']}"
             )
 
+
         with trend_col2:
 
             st.write(
@@ -294,9 +327,11 @@ if analyze_button:
                 f"{activity_metrics['most_active_day_commits']}"
             )
 
+
         commits_df = analysis[
             "commits"
         ]
+
 
         if not commits_df.empty:
 
@@ -309,6 +344,7 @@ if analyze_button:
                 )
             )
 
+
             figure = px.line(
                 daily_commits,
                 x="day",
@@ -317,15 +353,18 @@ if analyze_button:
                 title="Commits Over Time"
             )
 
+
             st.plotly_chart(
                 figure,
                 width="stretch"
             )
 
+
             st.dataframe(
                 commits_df,
                 width="stretch"
             )
+
 
         else:
 
@@ -344,15 +383,19 @@ if analyze_button:
             "Contributor Analysis"
         )
 
+
         contributor_metrics = analysis[
             "contributor_metrics"
         ]
+
 
         concentration = analysis[
             "contributor_concentration"
         ]
 
+
         col1, col2, col3 = st.columns(3)
+
 
         with col1:
 
@@ -363,6 +406,7 @@ if analyze_button:
                 ]
             )
 
+
         with col2:
 
             st.metric(
@@ -371,6 +415,7 @@ if analyze_button:
                     "top_contributor"
                 ]
             )
+
 
         with col3:
 
@@ -383,18 +428,22 @@ if analyze_button:
                 )
             )
 
+
         st.subheader(
             "Contributor Concentration"
         )
+
 
         st.write(
             "Share of analyzed contributions "
             "made by the leading contributors."
         )
 
+
         concentration_col1, concentration_col2 = (
             st.columns(2)
         )
+
 
         with concentration_col1:
 
@@ -407,6 +456,7 @@ if analyze_button:
                 )
             )
 
+
         with concentration_col2:
 
             st.metric(
@@ -418,9 +468,11 @@ if analyze_button:
                 )
             )
 
+
         contributors_df = analysis[
             "contributors"
         ]
+
 
         if not contributors_df.empty:
 
@@ -431,15 +483,18 @@ if analyze_button:
                 title="Contributor Contributions"
             )
 
+
             st.plotly_chart(
                 figure,
                 width="stretch"
             )
 
+
             st.dataframe(
                 contributors_df,
                 width="stretch"
             )
+
 
         else:
 
@@ -456,11 +511,14 @@ if analyze_button:
 
         st.header("Issue Analysis")
 
+
         issue_metrics = analysis[
             "issue_metrics"
         ]
 
+
         col1, col2, col3, col4 = st.columns(4)
+
 
         with col1:
 
@@ -471,6 +529,7 @@ if analyze_button:
                 ]
             )
 
+
         with col2:
 
             st.metric(
@@ -480,6 +539,7 @@ if analyze_button:
                 ]
             )
 
+
         with col3:
 
             st.metric(
@@ -488,6 +548,7 @@ if analyze_button:
                     "closed_issues"
                 ]
             )
+
 
         with col4:
 
@@ -500,9 +561,11 @@ if analyze_button:
                 )
             )
 
+
         issues_df = analysis[
             "issues"
         ]
+
 
         if not issues_df.empty:
 
@@ -512,10 +575,12 @@ if analyze_button:
                 .reset_index()
             )
 
+
             issue_state_counts.columns = [
                 "state",
                 "count"
             ]
+
 
             figure = px.pie(
                 issue_state_counts,
@@ -524,15 +589,18 @@ if analyze_button:
                 title="Issue Status Distribution"
             )
 
+
             st.plotly_chart(
                 figure,
                 width="stretch"
             )
 
+
             st.dataframe(
                 issues_df,
                 width="stretch"
             )
+
 
         else:
 
@@ -551,11 +619,14 @@ if analyze_button:
             "Pull Request Analysis"
         )
 
+
         pr_metrics = analysis[
             "pull_request_metrics"
         ]
 
+
         col1, col2, col3, col4 = st.columns(4)
+
 
         with col1:
 
@@ -566,6 +637,7 @@ if analyze_button:
                 ]
             )
 
+
         with col2:
 
             st.metric(
@@ -575,6 +647,7 @@ if analyze_button:
                 ]
             )
 
+
         with col3:
 
             st.metric(
@@ -583,6 +656,7 @@ if analyze_button:
                     "merged_pull_requests"
                 ]
             )
+
 
         with col4:
 
@@ -595,9 +669,11 @@ if analyze_button:
                 )
             )
 
+
         pull_requests_df = analysis[
             "pull_requests"
         ]
+
 
         if not pull_requests_df.empty:
 
@@ -607,10 +683,12 @@ if analyze_button:
                 .reset_index()
             )
 
+
             pr_state_counts.columns = [
                 "state",
                 "count"
             ]
+
 
             figure = px.pie(
                 pr_state_counts,
@@ -619,15 +697,18 @@ if analyze_button:
                 title="Pull Request Status"
             )
 
+
             st.plotly_chart(
                 figure,
                 width="stretch"
             )
 
+
             st.dataframe(
                 pull_requests_df,
                 width="stretch"
             )
+
 
         else:
 
@@ -646,9 +727,11 @@ if analyze_button:
             "Programming Language Analysis"
         )
 
+
         languages_df = analysis[
             "languages"
         ]
+
 
         if not languages_df.empty:
 
@@ -659,15 +742,18 @@ if analyze_button:
                 title="Programming Language Distribution"
             )
 
+
             st.plotly_chart(
                 figure,
                 width="stretch"
             )
 
+
             st.dataframe(
                 languages_df,
                 width="stretch"
             )
+
 
         else:
 
@@ -686,11 +772,14 @@ if analyze_button:
             "Release Analysis"
         )
 
+
         release_metrics = analysis[
             "release_metrics"
         ]
 
+
         col1, col2 = st.columns(2)
+
 
         with col1:
 
@@ -701,6 +790,7 @@ if analyze_button:
                 ]
             )
 
+
         with col2:
 
             st.metric(
@@ -710,9 +800,11 @@ if analyze_button:
                 ]
             )
 
+
         releases_df = analysis[
             "releases"
         ]
+
 
         if not releases_df.empty:
 
@@ -720,6 +812,7 @@ if analyze_button:
                 releases_df,
                 width="stretch"
             )
+
 
         else:
 

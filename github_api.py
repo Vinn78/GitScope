@@ -296,7 +296,11 @@ def get_releases(
 # Complete Repository Analysis
 # ==============================
 
-def analyze_repository(owner, repo):
+def analyze_repository(
+    owner,
+    repo,
+    selected_analyses=None
+):
 
     # ==========================
     # Fetch Repository Data
@@ -307,35 +311,79 @@ def analyze_repository(owner, repo):
         repo
     )
 
-    commits = get_commits(
-        owner,
-        repo
+    # If no selections are provided,
+    # analyze all available sections.
+    if selected_analyses is None:
+
+        selected_analyses = [
+            "Commits",
+            "Contributors",
+            "Issues",
+            "Pull Requests",
+            "Languages",
+            "Releases"
+        ]
+
+    selected_analyses = set(
+        selected_analyses
     )
 
-    contributors = get_contributors(
-        owner,
-        repo
-    )
+    # ==========================
+    # Initialize Empty Data
+    # ==========================
 
-    issues = get_issues(
-        owner,
-        repo
-    )
+    commits = []
+    contributors = []
+    issues = []
+    pull_requests = []
+    languages = {}
+    releases = []
 
-    pull_requests = get_pull_requests(
-        owner,
-        repo
-    )
+    # ==========================
+    # Fetch Selected Data Only
+    # ==========================
 
-    languages = get_languages(
-        owner,
-        repo
-    )
+    if "Commits" in selected_analyses:
 
-    releases = get_releases(
-        owner,
-        repo
-    )
+        commits = get_commits(
+            owner,
+            repo
+        )
+
+    if "Contributors" in selected_analyses:
+
+        contributors = get_contributors(
+            owner,
+            repo
+        )
+
+    if "Issues" in selected_analyses:
+
+        issues = get_issues(
+            owner,
+            repo
+        )
+
+    if "Pull Requests" in selected_analyses:
+
+        pull_requests = get_pull_requests(
+            owner,
+            repo
+        )
+
+    if "Languages" in selected_analyses:
+
+        languages = get_languages(
+            owner,
+            repo
+        )
+
+    if "Releases" in selected_analyses:
+
+        releases = get_releases(
+            owner,
+            repo
+        )
 
     # ==========================
     # Convert API Data
