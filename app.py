@@ -92,7 +92,6 @@ selected_analyses = st.multiselect(
     analysis_options
 )
 
-
 analyze_button = st.button(
     "Analyze Selected",
     type="primary"
@@ -158,7 +157,6 @@ if analyze_button:
 
         st.stop()
 
-
     repository = analysis["repository"]
 
 
@@ -204,7 +202,6 @@ if analyze_button:
                 "language"
             ) or "N/A"
         )
-
 
     st.write(
         f"**Repository:** "
@@ -262,7 +259,6 @@ if analyze_button:
                 f"{commit_metrics['average_commits_per_day']:.2f}"
             )
 
-
         st.subheader(
             "Commit Activity Trend"
         )
@@ -298,7 +294,6 @@ if analyze_button:
                 f"{activity_metrics['most_active_day_commits']}"
             )
 
-
         commits_df = analysis[
             "commits"
         ]
@@ -324,12 +319,12 @@ if analyze_button:
 
             st.plotly_chart(
                 figure,
-                use_container_width=True
+                width="stretch"
             )
 
             st.dataframe(
                 commits_df,
-                use_container_width=True
+                width="stretch"
             )
 
         else:
@@ -388,7 +383,6 @@ if analyze_button:
                 )
             )
 
-
         st.subheader(
             "Contributor Concentration"
         )
@@ -424,7 +418,6 @@ if analyze_button:
                 )
             )
 
-
         contributors_df = analysis[
             "contributors"
         ]
@@ -440,12 +433,12 @@ if analyze_button:
 
             st.plotly_chart(
                 figure,
-                use_container_width=True
+                width="stretch"
             )
 
             st.dataframe(
                 contributors_df,
-                use_container_width=True
+                width="stretch"
             )
 
         else:
@@ -507,7 +500,6 @@ if analyze_button:
                 )
             )
 
-
         issues_df = analysis[
             "issues"
         ]
@@ -534,12 +526,12 @@ if analyze_button:
 
             st.plotly_chart(
                 figure,
-                use_container_width=True
+                width="stretch"
             )
 
             st.dataframe(
                 issues_df,
-                use_container_width=True
+                width="stretch"
             )
 
         else:
@@ -603,7 +595,6 @@ if analyze_button:
                 )
             )
 
-
         pull_requests_df = analysis[
             "pull_requests"
         ]
@@ -630,12 +621,12 @@ if analyze_button:
 
             st.plotly_chart(
                 figure,
-                use_container_width=True
+                width="stretch"
             )
 
             st.dataframe(
                 pull_requests_df,
-                use_container_width=True
+                width="stretch"
             )
 
         else:
@@ -670,12 +661,12 @@ if analyze_button:
 
             st.plotly_chart(
                 figure,
-                use_container_width=True
+                width="stretch"
             )
 
             st.dataframe(
                 languages_df,
-                use_container_width=True
+                width="stretch"
             )
 
         else:
@@ -719,7 +710,6 @@ if analyze_button:
                 ]
             )
 
-
         releases_df = analysis[
             "releases"
         ]
@@ -728,7 +718,7 @@ if analyze_button:
 
             st.dataframe(
                 releases_df,
-                use_container_width=True
+                width="stretch"
             )
 
         else:
