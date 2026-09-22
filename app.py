@@ -796,6 +796,32 @@ else:
         unsafe_allow_html=True,
     )
 
+st.markdown(
+    '<div style="height:.55rem"></div><div class="step-line"><div class="step-number">03</div><div class="step-label">Analysis period</div><div class="step-note">Choose the time window</div></div>',
+    unsafe_allow_html=True,
+)
+
+period_options = [
+    "Last 30 Days",
+    "Last 3 Months",
+    "Last 6 Months",
+    "Last 1 Year",
+    "Last 2 Years",
+    "All Time",
+]
+
+selected_period = st.selectbox(
+    "Analysis period",
+    period_options,
+    index=0,
+    label_visibility="collapsed",
+)
+
+st.markdown(
+    f'<div class="module-note">GitScope will apply <b>{esc(selected_period)}</b> to time-based analysis modules. Repository overview and language composition remain repository-level data.</div>',
+    unsafe_allow_html=True,
+)
+
 st.markdown('<div style="height:.15rem"></div>', unsafe_allow_html=True)
 analyze_button = st.button("Analyze Repository  →", type="primary", width="stretch")
 
@@ -831,7 +857,12 @@ if analyze_button:
 
     try:
         with st.spinner("Fetching repository data from GitHub and building your insights…"):
-            analysis = analyze_repository(owner, repo, selected_analyses)
+            analysis = analyze_repository(
+                owner,
+                repo,
+                selected_analyses,
+                period=selected_period,
+            )
     except Exception as error:
         st.error(f"Unable to analyze repository: {error}")
         st.stop()
@@ -849,7 +880,9 @@ if analyze_button:
         if isinstance(license_info, dict) else "N/A"
     )
 
-    st.success(f"Analysis complete for {full_name}")
+    st.success(
+        f"Analysis complete for {full_name} · {selected_period}"
+    )
 
     section_header(
         1,
@@ -882,6 +915,7 @@ if analyze_button:
     with o5: st.metric("Default branch", default_branch)
 
     meta_bits = [
+        f"Analysis period: {selected_period}",
         f"Updated: {updated_at}",
         f"License: {license_name}",
         f"Owner: {owner}",
