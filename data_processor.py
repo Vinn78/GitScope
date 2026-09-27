@@ -1,9 +1,6 @@
 import pandas as pd
 
 
-                                
-                   
-                                
 
 def commits_to_dataframe(commits):
     rows = []
@@ -48,17 +45,12 @@ def commits_to_dataframe(commits):
     return df
 
 
-                                
-                  
-                                
 
 def issues_to_dataframe(issues):
     rows = []
 
     for issue in issues:
 
-                                          
-                        
         if "pull_request" in issue:
             continue
 
@@ -104,9 +96,6 @@ def issues_to_dataframe(issues):
     return df
 
 
-                                
-                         
-                                
 
 def pull_requests_to_dataframe(
     pull_requests
@@ -170,9 +159,6 @@ def pull_requests_to_dataframe(
     return df
 
 
-                                
-                     
-                                
 
 def languages_to_dataframe(languages):
     rows = []
@@ -213,9 +199,6 @@ def languages_to_dataframe(languages):
     return df
 
 
-                                
-                    
-                                
 
 def releases_to_dataframe(releases):
     rows = []
@@ -276,9 +259,6 @@ def releases_to_dataframe(releases):
     return df
 
 
-                                
-                        
-                                
 
 def contributors_to_dataframe(
     contributors
@@ -329,9 +309,6 @@ def contributors_to_dataframe(
     return df
 
 
-                                
-                
-                                
 
 def calculate_commit_metrics(df):
 
@@ -366,9 +343,6 @@ def calculate_commit_metrics(df):
     return metrics
 
 
-                                
-                       
-                                
 
 def calculate_commit_activity_trend(df):
 
@@ -420,9 +394,6 @@ def calculate_commit_activity_trend(df):
     return metrics
 
 
-                                
-                         
-                                
 
 def calculate_monthly_commit_activity(df):
 
@@ -438,7 +409,7 @@ def calculate_monthly_commit_activity(df):
 
     monthly_activity = (
         df.assign(
-            month=df["date"].dt.to_period("M")
+            month=df["date"].dt.tz_localize(None).dt.to_period("M")
         )
         .groupby("month")
         .agg(
@@ -493,9 +464,6 @@ def calculate_monthly_commit_activity(df):
     return metrics, monthly_activity
 
 
-                                
-               
-                                
 
 def calculate_issue_metrics(df):
 
@@ -537,9 +505,6 @@ def calculate_issue_metrics(df):
     return metrics
 
 
-                                
-                      
-                                
 
 def calculate_pull_request_metrics(df):
 
@@ -588,9 +553,6 @@ def calculate_pull_request_metrics(df):
     return metrics
 
 
-                                
-                     
-                                
 
 def calculate_contributor_metrics(df):
 
@@ -627,9 +589,6 @@ def calculate_contributor_metrics(df):
     return metrics
 
 
-                                
-                           
-                                
 
 def calculate_contributor_concentration(df):
 
@@ -662,9 +621,6 @@ def calculate_contributor_concentration(df):
     return metrics
 
 
-                                
-                 
-                                
 
 def calculate_release_metrics(df):
 
@@ -699,7 +655,6 @@ def calculate_release_metrics(df):
         published_releases.iloc[-1]["tag"]
     )
 
-                                                 
     if len(published_releases) > 1:
 
         release_dates = (
@@ -721,7 +676,6 @@ def calculate_release_metrics(df):
                 intervals.mean()
             )
 
-                                           
     date_span_days = (
         published_releases["published_at"].max()
         - published_releases["published_at"].min()

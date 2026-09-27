@@ -32,9 +32,9 @@ import streamlit.components.v1 as components
 from github_api import PERIOD_OPTIONS, analyze_repository
 
 
-                                
-                    
-                                
+# ==============================
+# Page Configuration
+# ==============================
 
 st.set_page_config(
     page_title="GitScope",
@@ -43,9 +43,9 @@ st.set_page_config(
 )
 
 
-                                
-                  
-                                
+# ==============================
+# 1. Design Tokens
+# ==============================
 
 THEME = {
     "bg": "#0d0f13",
@@ -65,7 +65,7 @@ THEME = {
     "danger": "#e5717d",
 }
 
-                                                                            
+# Muted, coherent series palette (indigo -> blue -> violet -> teal -> rose).
 CHART_COLORS = [
     "#7583ff", "#a08bff", "#56a5f7", "#45c2b0", "#d78fe0",
     "#8ea2c8", "#e3a94f", "#6cc4e8", "#b6a2ff", "#7f8cf0",
@@ -132,9 +132,9 @@ ANALYSIS_META = {
 }
 
 
-                                
-                                 
-                                
+# ==============================
+# 2. Icons and Formatting Helpers
+# ==============================
 
 _ICON_PATHS = {
     "github": (
@@ -369,9 +369,9 @@ def github_url(owner, repo, path=""):
     return f"{base}/{path}" if path else base
 
 
-                                
-               
-                                
+# ==============================
+# 3. Global CSS
+# ==============================
 
 def _root_variables():
     """Design tokens exposed as CSS custom properties (single source of truth)."""
@@ -1270,9 +1270,9 @@ def inject_styles():
     )
 
 
-                                
-                           
-                                
+# ==============================
+# 4. Reusable UI Components
+# ==============================
 
 def hero():
 
@@ -1460,9 +1460,9 @@ def styled_dataframe(df, column_config=None, height=None, column_order=None):
     )
 
 
-                                
-                                                
-                                
+# ==============================
+# 5. Chart Helpers (one consistent Plotly theme)
+# ==============================
 
 def _style_figure(fig, height=340, legend=True):
     """Apply the shared dark theme to any Plotly figure in place."""
@@ -1687,9 +1687,9 @@ def releases_timeline_figure(releases_df):
     return _style_figure(fig, height=170, legend=False)
 
 
-                                
-                      
-                                
+# ==============================
+# 6. Section Renderers
+# ==============================
 
 def render_repository_overview(repository, owner, repo):
 
@@ -2170,9 +2170,9 @@ def render_releases_section(analysis, owner, repo):
             )
 
 
-                                
-                                              
-                                
+# ==============================
+# 7. Input Panel, Analysis Flow, Page Assembly
+# ==============================
 
 def init_state():
 
@@ -2280,7 +2280,6 @@ def render_control_panel():
         st.selectbox(
             "Analysis period",
             PERIOD_OPTIONS,
-            index=PERIOD_OPTIONS.index("All Time") if "All Time" in PERIOD_OPTIONS else 0,
             key="selected_period",
             label_visibility="collapsed",
         )
