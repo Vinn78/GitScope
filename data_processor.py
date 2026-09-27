@@ -1,9 +1,9 @@
 import pandas as pd
 
 
-# ==============================
-# Commit Processing
-# ==============================
+                                
+                   
+                                
 
 def commits_to_dataframe(commits):
     rows = []
@@ -48,17 +48,17 @@ def commits_to_dataframe(commits):
     return df
 
 
-# ==============================
-# Issue Processing
-# ==============================
+                                
+                  
+                                
 
 def issues_to_dataframe(issues):
     rows = []
 
     for issue in issues:
 
-        # GitHub's Issues API also returns
-        # Pull Requests.
+                                          
+                        
         if "pull_request" in issue:
             continue
 
@@ -104,9 +104,9 @@ def issues_to_dataframe(issues):
     return df
 
 
-# ==============================
-# Pull Request Processing
-# ==============================
+                                
+                         
+                                
 
 def pull_requests_to_dataframe(
     pull_requests
@@ -170,9 +170,9 @@ def pull_requests_to_dataframe(
     return df
 
 
-# ==============================
-# Language Processing
-# ==============================
+                                
+                     
+                                
 
 def languages_to_dataframe(languages):
     rows = []
@@ -213,9 +213,9 @@ def languages_to_dataframe(languages):
     return df
 
 
-# ==============================
-# Release Processing
-# ==============================
+                                
+                    
+                                
 
 def releases_to_dataframe(releases):
     rows = []
@@ -276,9 +276,9 @@ def releases_to_dataframe(releases):
     return df
 
 
-# ==============================
-# Contributor Processing
-# ==============================
+                                
+                        
+                                
 
 def contributors_to_dataframe(
     contributors
@@ -329,9 +329,9 @@ def contributors_to_dataframe(
     return df
 
 
-# ==============================
-# Commit Metrics
-# ==============================
+                                
+                
+                                
 
 def calculate_commit_metrics(df):
 
@@ -366,9 +366,9 @@ def calculate_commit_metrics(df):
     return metrics
 
 
-# ==============================
-# Commit Activity Trend
-# ==============================
+                                
+                       
+                                
 
 def calculate_commit_activity_trend(df):
 
@@ -420,9 +420,82 @@ def calculate_commit_activity_trend(df):
     return metrics
 
 
-# ==============================
-# Issue Metrics
-# ==============================
+                                
+                         
+                                
+
+def calculate_monthly_commit_activity(df):
+
+    metrics = {
+        "active_months": 0,
+        "most_active_month": "N/A",
+        "most_active_month_commits": 0,
+        "average_commits_per_active_month": 0.0
+    }
+
+    if df.empty:
+        return metrics, pd.DataFrame()
+
+    monthly_activity = (
+        df.assign(
+            month=df["date"].dt.to_period("M")
+        )
+        .groupby("month")
+        .agg(
+            commits=("sha", "count"),
+            active_days=("day", "nunique"),
+            contributors=("author", "nunique")
+        )
+        .reset_index()
+    )
+
+    if monthly_activity.empty:
+        return metrics, pd.DataFrame()
+
+    monthly_activity["month"] = (
+        monthly_activity["month"]
+        .astype(str)
+    )
+
+    monthly_activity = monthly_activity.sort_values(
+        "month"
+    ).reset_index(
+        drop=True
+    )
+
+    metrics["active_months"] = int(
+        len(monthly_activity)
+    )
+
+    most_active_index = (
+        monthly_activity["commits"]
+        .idxmax()
+    )
+
+    metrics["most_active_month"] = str(
+        monthly_activity.loc[
+            most_active_index,
+            "month"
+        ]
+    )
+
+    metrics["most_active_month_commits"] = int(
+        monthly_activity.loc[
+            most_active_index,
+            "commits"
+        ]
+    )
+
+    metrics["average_commits_per_active_month"] = float(
+        monthly_activity["commits"].mean()
+    )
+
+    return metrics, monthly_activity
+
+
+                                
+               
+                                
 
 def calculate_issue_metrics(df):
 
@@ -464,9 +537,9 @@ def calculate_issue_metrics(df):
     return metrics
 
 
-# ==============================
-# Pull Request Metrics
-# ==============================
+                                
+                      
+                                
 
 def calculate_pull_request_metrics(df):
 
@@ -515,9 +588,9 @@ def calculate_pull_request_metrics(df):
     return metrics
 
 
-# ==============================
-# Contributor Metrics
-# ==============================
+                                
+                     
+                                
 
 def calculate_contributor_metrics(df):
 
@@ -554,9 +627,9 @@ def calculate_contributor_metrics(df):
     return metrics
 
 
-# ==============================
-# Contributor Concentration
-# ==============================
+                                
+                           
+                                
 
 def calculate_contributor_concentration(df):
 
@@ -589,15 +662,17 @@ def calculate_contributor_concentration(df):
     return metrics
 
 
-# ==============================
-# Release Metrics
-# ==============================
+                                
+                 
+                                
 
 def calculate_release_metrics(df):
 
     metrics = {
         "total_releases": 0,
-        "latest_release": "N/A"
+        "latest_release": "N/A",
+        "average_days_between_releases": 0.0,
+        "releases_per_month": 0.0
     }
 
     if df.empty:
@@ -613,14 +688,51 @@ def calculate_release_metrics(df):
         ]
         .sort_values(
             "published_at",
-            ascending=False
+            ascending=True
         )
     )
 
-    if not published_releases.empty:
+    if published_releases.empty:
+        return metrics
 
-        metrics["latest_release"] = str(
-            published_releases.iloc[0]["tag"]
+    metrics["latest_release"] = str(
+        published_releases.iloc[-1]["tag"]
+    )
+
+                                                 
+    if len(published_releases) > 1:
+
+        release_dates = (
+            published_releases["published_at"]
+            .dropna()
+            .sort_values()
+        )
+
+        intervals = (
+            release_dates.diff()
+            .dropna()
+            .dt.total_seconds()
+            / 86400
+        )
+
+        if not intervals.empty:
+
+            metrics["average_days_between_releases"] = float(
+                intervals.mean()
+            )
+
+                                           
+    date_span_days = (
+        published_releases["published_at"].max()
+        - published_releases["published_at"].min()
+    ).total_seconds() / 86400
+
+    if date_span_days > 0:
+
+        months = date_span_days / 30.44
+
+        metrics["releases_per_month"] = float(
+            len(published_releases) / months
         )
 
     return metrics

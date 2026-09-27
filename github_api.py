@@ -17,6 +17,7 @@ from data_processor import (
     contributors_to_dataframe,
     calculate_commit_metrics,
     calculate_commit_activity_trend,
+    calculate_monthly_commit_activity,
     calculate_issue_metrics,
     calculate_pull_request_metrics,
     calculate_contributor_metrics,
@@ -24,9 +25,9 @@ from data_processor import (
     calculate_release_metrics,
 )
 
-# ============================================================
-# ENVIRONMENT CONFIGURATION
-# ============================================================
+                                                              
+                           
+                                                              
 
 load_dotenv()
 
@@ -35,15 +36,15 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 PER_PAGE = 100
 
-# Internal safety limit. This is not the old 500-record limit.
-# Period-based requests normally stop much earlier when they
-# reach records older than the selected period.
-INTERNAL_MAX_RECORDS = 10000
+                                   
+                                                             
+                                                
+INTERNAL_MAX_RECORDS = None
 
 
-# ============================================================
-# PERIOD OPTIONS
-# ============================================================
+                                                              
+                
+                                                              
 
 PERIOD_OPTIONS = [
     "Last 30 Days",
@@ -95,9 +96,9 @@ def datetime_to_github_string(value):
     )
 
 
-# ============================================================
-# GITHUB API HEADERS
-# ============================================================
+                                                              
+                    
+                                                              
 
 HEADERS = {
     "Accept": "application/vnd.github+json",
@@ -108,19 +109,38 @@ if GITHUB_TOKEN:
     HEADERS["Authorization"] = f"Bearer {GITHUB_TOKEN}"
 
 
-# ============================================================
-# SHARED API REQUEST FUNCTION
-# ============================================================
+                                                              
+                             
+                                                              
 
 def github_get(url, params=None):
-    """Perform one authenticated GitHub REST API request."""
+    """Perform one authenticated GitHub REST API request with retry handling."""
 
-    response = requests.get(
-        url,
-        params=params,
-        headers=HEADERS,
-        timeout=30,
-    )
+    last_error = None
+
+    for attempt in range(3):
+        try:
+            response = requests.get(
+                url,
+                params=params,
+                headers=HEADERS,
+                timeout=30,
+            )
+            break
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout) as exc:
+            last_error = exc
+            if attempt == 2:
+                raise Exception(
+                    "GitHub API connection failed after 3 attempts: "
+                    f"{exc}"
+                ) from exc
+
+    if last_error is not None and "response" not in locals():
+        raise Exception(
+            "GitHub API connection failed: "
+            f"{last_error}"
+        ) from last_error
 
     if response.status_code == 403:
         remaining = response.headers.get("X-RateLimit-Remaining")
@@ -143,22 +163,41 @@ def github_get(url, params=None):
     return response.json()
 
 
-# ============================================================
-# GITHUB GRAPHQL REQUEST FUNCTION
-# ============================================================
+                                                              
+                                 
+                                                              
 
 def github_graphql(query, variables=None):
-    """Perform an authenticated GitHub GraphQL API request."""
+    """Perform an authenticated GitHub GraphQL API request with retry handling."""
 
-    response = requests.post(
-        "https://api.github.com/graphql",
-        json={
-            "query": query,
-            "variables": variables or {},
-        },
-        headers=HEADERS,
-        timeout=30,
-    )
+    last_error = None
+
+    for attempt in range(3):
+        try:
+            response = requests.post(
+                "https://api.github.com/graphql",
+                json={
+                    "query": query,
+                    "variables": variables or {},
+                },
+                headers=HEADERS,
+                timeout=30,
+            )
+            break
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout) as exc:
+            last_error = exc
+            if attempt == 2:
+                raise Exception(
+                    "GitHub GraphQL connection failed after 3 attempts: "
+                    f"{exc}"
+                ) from exc
+
+    if last_error is not None and "response" not in locals():
+        raise Exception(
+            "GitHub GraphQL connection failed: "
+            f"{last_error}"
+        ) from last_error
 
     if response.status_code == 403:
         remaining = response.headers.get("X-RateLimit-Remaining")
@@ -188,15 +227,15 @@ def github_graphql(query, variables=None):
     return payload.get("data", {})
 
 
-# ============================================================
-# SMART PAGINATION
-# ============================================================
+                                                              
+                  
+                                                              
 
 def github_get_all(
     url,
     params=None,
     per_page=PER_PAGE,
-    max_records=INTERNAL_MAX_RECORDS,
+    max_records=None,
     stop_when_older_than=None,
     date_fields=None,
 ):
@@ -218,7 +257,7 @@ def github_get_all(
     page = 1
     page_size = min(per_page, 100)
 
-    while len(all_data) < max_records:
+    while max_records is None or len(all_data) < max_records:
         page_params = params.copy()
         page_params["per_page"] = page_size
         page_params["page"] = page
@@ -261,7 +300,7 @@ def github_get_all(
 
             all_data.append(item)
 
-            if len(all_data) >= max_records:
+            if max_records is not None and len(all_data) >= max_records:
                 break
 
         if stop_pagination:
@@ -275,9 +314,9 @@ def github_get_all(
     return all_data
 
 
-# ============================================================
-# REPOSITORY API
-# ============================================================
+                                                              
+                
+                                                              
 
 @lru_cache(maxsize=64)
 def get_repository(owner, repo):
@@ -289,9 +328,9 @@ def get_repository(owner, repo):
     return github_get(url)
 
 
-# ============================================================
-# COMMITS API
-# ============================================================
+                                                              
+             
+                                                              
 
 def get_commits(
     owner,
@@ -299,7 +338,7 @@ def get_commits(
     since=None,
     until=None,
     per_page=PER_PAGE,
-    max_records=INTERNAL_MAX_RECORDS,
+    max_records=None,
 ):
     url = (
         f"{GITHUB_API_URL}/repos/"
@@ -322,15 +361,15 @@ def get_commits(
     )
 
 
-# ============================================================
-# CONTRIBUTORS API
-# ============================================================
+                                                              
+                  
+                                                              
 
 def get_contributors(
     owner,
     repo,
     per_page=PER_PAGE,
-    max_records=INTERNAL_MAX_RECORDS,
+    max_records=None,
 ):
     url = (
         f"{GITHUB_API_URL}/repos/"
@@ -344,9 +383,9 @@ def get_contributors(
     )
 
 
-# ============================================================
-# ISSUES API
-# ============================================================
+                                                              
+            
+                                                              
 
 def get_issues(
     owner,
@@ -354,7 +393,7 @@ def get_issues(
     state="all",
     since=None,
     per_page=PER_PAGE,
-    max_records=INTERNAL_MAX_RECORDS,
+    max_records=None,
 ):
     """
     Fetch repository issues using GraphQL cursor pagination.
@@ -412,7 +451,7 @@ def get_issues(
     cursor = None
     page_size = min(per_page, 100)
 
-    while len(results) < max_records:
+    while max_records is None or len(results) < max_records:
         data = github_graphql(
             query,
             {
@@ -457,8 +496,8 @@ def get_issues(
                     stop_pagination = True
                     break
 
-            # Convert GraphQL fields to the same shape expected by
-            # issues_to_dataframe().
+                                                                  
+                                    
             results.append(
                 {
                     "number": item.get("number"),
@@ -474,7 +513,7 @@ def get_issues(
                 }
             )
 
-            if len(results) >= max_records:
+            if max_records is not None and len(results) >= max_records:
                 break
 
         if stop_pagination:
@@ -495,9 +534,9 @@ def get_issues(
     return results
 
 
-# ============================================================
-# PULL REQUESTS API
-# ============================================================
+                                                              
+                   
+                                                              
 
 def get_pull_requests(
     owner,
@@ -505,7 +544,7 @@ def get_pull_requests(
     state="all",
     since=None,
     per_page=PER_PAGE,
-    max_records=INTERNAL_MAX_RECORDS,
+    max_records=None,
 ):
     url = (
         f"{GITHUB_API_URL}/repos/"
@@ -528,9 +567,9 @@ def get_pull_requests(
     )
 
 
-# ============================================================
-# LANGUAGES API
-# ============================================================
+                                                              
+               
+                                                              
 
 @lru_cache(maxsize=64)
 def get_languages(owner, repo):
@@ -542,16 +581,16 @@ def get_languages(owner, repo):
     return github_get(url)
 
 
-# ============================================================
-# RELEASES API
-# ============================================================
+                                                              
+              
+                                                              
 
 def get_releases(
     owner,
     repo,
     since=None,
     per_page=PER_PAGE,
-    max_records=INTERNAL_MAX_RECORDS,
+    max_records=None,
 ):
     url = (
         f"{GITHUB_API_URL}/repos/"
@@ -567,9 +606,9 @@ def get_releases(
     )
 
 
-# ============================================================
-# DATAFRAME DATE FILTERING
-# ============================================================
+                                                              
+                          
+                                                              
 
 def filter_dataframe_by_date(
     df,
@@ -646,9 +685,9 @@ def filter_releases_by_period(
     )
 
 
-# ============================================================
-# PERIOD-BASED CONTRIBUTOR DATA
-# ============================================================
+                                                              
+                               
+                                                              
 
 def commits_to_contributors(commits_df):
     """
@@ -681,9 +720,9 @@ def commits_to_contributors(commits_df):
     ]
 
 
-# ============================================================
-# DEFAULT EMPTY VALUES
-# ============================================================
+                                                              
+                      
+                                                              
 
 def empty_dataframe():
     return pd.DataFrame()
@@ -693,9 +732,9 @@ def empty_metric_dict():
     return {}
 
 
-# ============================================================
-# PARALLEL DATA FETCHING
-# ============================================================
+                                                              
+                        
+                                                              
 
 def fetch_selected_datasets(
     owner,
@@ -760,9 +799,9 @@ def fetch_selected_datasets(
     if not tasks:
         return results
 
-    # Six workers match the six independent analysis resources.
-    # Each worker still respects the GitHub API request timeout and
-    # rate-limit handling in the underlying functions.
+                                                               
+                                                                   
+                                                      
     with ThreadPoolExecutor(max_workers=min(6, len(tasks))) as executor:
         future_map = {
             executor.submit(task): name
@@ -774,8 +813,8 @@ def fetch_selected_datasets(
                 name = future_map[future]
                 results[name] = future.result()
         except Exception:
-            # Cancel work that has not started. Running requests will
-            # finish normally and their exception is not swallowed.
+                                                                     
+                                                                   
             for future in future_map:
                 future.cancel()
             raise
@@ -783,9 +822,9 @@ def fetch_selected_datasets(
     return results
 
 
-# ============================================================
-# COMPLETE REPOSITORY ANALYSIS
-# ============================================================
+                                                              
+                              
+                                                              
 
 def analyze_repository(
     owner,
@@ -850,12 +889,12 @@ def analyze_repository(
 
     since, until = get_period_dates(period)
 
-    # Repository overview is always required.
+                                             
     repository = get_repository(owner, repo)
 
-    # --------------------------------------------------------
-    # Determine what data must be fetched.
-    # --------------------------------------------------------
+                                                              
+                                          
+                                                              
 
     commits_required = (
         "Commits" in selected_analyses
@@ -882,9 +921,9 @@ def analyze_repository(
 
     releases_required = "Releases" in selected_analyses
 
-    # --------------------------------------------------------
-    # Fetch selected datasets concurrently.
-    # --------------------------------------------------------
+                                                              
+                                           
+                                                              
 
     datasets = fetch_selected_datasets(
         owner,
@@ -906,9 +945,9 @@ def analyze_repository(
     languages = datasets["languages"]
     releases = datasets["releases"]
 
-    # --------------------------------------------------------
-    # Convert API responses into DataFrames.
-    # --------------------------------------------------------
+                                                              
+                                            
+                                                              
 
     commits_df = (
         commits_to_dataframe(commits)
@@ -956,9 +995,9 @@ def analyze_repository(
         else empty_dataframe()
     )
 
-    # --------------------------------------------------------
-    # Extra local filtering for correctness.
-    # --------------------------------------------------------
+                                                              
+                                            
+                                                              
 
     if "Commits" in selected_analyses:
         commits_df = filter_dataframe_by_date(
@@ -989,9 +1028,9 @@ def analyze_repository(
             until,
         )
 
-    # --------------------------------------------------------
-    # Calculate metrics only for selected modules.
-    # --------------------------------------------------------
+                                                              
+                                                  
+                                                              
 
     if "Commits" in selected_analyses:
         commit_metrics = calculate_commit_metrics(
@@ -1002,9 +1041,16 @@ def analyze_repository(
                 commits_df
             )
         )
+        commit_monthly_metrics, commit_monthly_trend = (
+            calculate_monthly_commit_activity(
+                commits_df
+            )
+        )
     else:
         commit_metrics = empty_metric_dict()
         commit_activity_trend = empty_metric_dict()
+        commit_monthly_metrics = empty_metric_dict()
+        commit_monthly_trend = empty_dataframe()
 
     if "Contributors" in selected_analyses:
         contributor_metrics = (
@@ -1060,6 +1106,8 @@ def analyze_repository(
 
         "commit_metrics": commit_metrics,
         "commit_activity_trend": commit_activity_trend,
+        "commit_monthly_metrics": commit_monthly_metrics,
+        "commit_monthly_trend": commit_monthly_trend,
 
         "contributor_metrics": contributor_metrics,
         "contributor_concentration": contributor_concentration,
@@ -1072,16 +1120,16 @@ def analyze_repository(
     }
 
 
-# ============================================================
-# DIRECT TEST
-# ============================================================
+                                                              
+             
+                                                              
 
 if __name__ == "__main__":
 
     owner = "pandas-dev"
     repo = "pandas"
 
-    # Keep the direct test lightweight.
+                                       
     test_period = "Last 30 Days"
 
     print("=" * 60)
