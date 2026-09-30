@@ -918,6 +918,7 @@ div[class*="st-key-card_"] {
 
 [data-testid="stPlotlyChart"] { background: transparent; }
 
+
 .gs-empty-chart { padding: 26px 8px; text-align: center; color: var(--gs-text-3); font-size: 0.9rem; }
 
 /* Insights */
@@ -1519,7 +1520,13 @@ PLOTLY_CONFIG = {
 
 def render_chart(fig):
 
-    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+    fig.update_layout(autosize=True)
+    st.plotly_chart(
+        fig,
+        width="stretch",
+        height=340,
+        config={**PLOTLY_CONFIG, "responsive": True},
+    )
 
 
 def commit_trend_figure(commits_df):
