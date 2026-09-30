@@ -1133,7 +1133,7 @@ if __name__ == "__main__":
     test_period = "Last 30 Days"
 
     print("=" * 60)
-    print("GitScope Repository Analysis Test")
+    print("RepoMetric - Repository Analysis Test")
     print("=" * 60)
 
     if GITHUB_TOKEN:
