@@ -1,5 +1,5 @@
 """
-RepoMetric - GitHub Repository Activity & Collaboration Analyzer
+GitScope - GitHub Repository Activity & Collaboration Analyzer
 ==============================================================
 
 Streamlit front end. This file only presents data: every number shown comes
@@ -31,21 +31,11 @@ import streamlit.components.v1 as components
 
 from github_api import PERIOD_OPTIONS, analyze_repository
 
-
-# ==============================
-# Page Configuration
-# ==============================
-
 st.set_page_config(
-    page_title="RepoMetric",
+    page_title="GitScope",
     page_icon="🔎",
     layout="wide"
 )
-
-
-# ==============================
-# 1. Design Tokens
-# ==============================
 
 THEME = {
     "bg": "#0d0f13",
@@ -64,8 +54,6 @@ THEME = {
     "warning": "#e3a94f",
     "danger": "#e5717d",
 }
-
-# Muted, coherent series palette (indigo -> blue -> violet -> teal -> rose).
 CHART_COLORS = [
     "#7583ff", "#a08bff", "#56a5f7", "#45c2b0", "#d78fe0",
     "#8ea2c8", "#e3a94f", "#6cc4e8", "#b6a2ff", "#7f8cf0",
@@ -130,11 +118,6 @@ ANALYSIS_META = {
         "description": "Release history and latest version",
     },
 }
-
-
-# ==============================
-# 2. Icons and Formatting Helpers
-# ==============================
 
 _ICON_PATHS = {
     "github": (
@@ -368,11 +351,6 @@ def github_url(owner, repo, path=""):
 
     return f"{base}/{path}" if path else base
 
-
-# ==============================
-# 3. Global CSS
-# ==============================
-
 def _root_variables():
     """Design tokens exposed as CSS custom properties (single source of truth)."""
 
@@ -407,7 +385,7 @@ def _root_variables():
 
 
 BASE_CSS = """
-/* ---------- App shell ---------- */
+
 html, body { background: var(--gs-bg); }
 
 .stApp {
@@ -441,7 +419,7 @@ footer { display: none !important; }
 [data-testid="stToolbar"] svg,
 [data-testid="stStatusWidget"] { color: var(--gs-text-2) !important; }
 
-/* The element that only carries this <style> block must not add a gap. */
+
 [data-testid="stElementContainer"]:has(> [data-testid="stMarkdown"] style) {
     display: none;
 }
@@ -457,7 +435,7 @@ footer { display: none !important; }
 
 .gs-i { display: block; flex: none; }
 
-/* ---------- Animated background (subtle, GPU-only transforms) ---------- */
+
 .stApp::before {
     content: "";
     position: fixed;
@@ -498,7 +476,7 @@ footer { display: none !important; }
     to   { transform: translate3d(0, 56px, 0); }
 }
 
-/* ---------- Hero ---------- */
+
 .gs-hero {
     position: relative;
     display: flex;
@@ -557,7 +535,7 @@ footer { display: none !important; }
     line-height: 1.55;
 }
 
-/* ---------- Input panel ---------- */
+
 div.st-key-control_panel {
     background:
         linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0) 40%),
@@ -580,7 +558,7 @@ div.st-key-control_panel {
 .gs-field-label b { font-size: 0.98rem; font-weight: 600; color: var(--gs-text); }
 .gs-field-label span { font-size: 0.86rem; color: var(--gs-text-3); }
 
-/* Repository URL field */
+
 div.st-key-repo_field [data-testid="stTextInput"] [data-baseweb="input"] {
     background: var(--gs-surface-2) !important;
     border: 1px solid var(--gs-border-strong) !important;
@@ -624,7 +602,7 @@ div.st-key-repo_field [data-testid="stTextInput"] input::placeholder {
     opacity: 1;
 }
 
-/* Analysis picker: real Streamlit buttons, drawn as selectable cards */
+
 div.st-key-module_grid {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
@@ -635,16 +613,11 @@ div[class*="st-key-apick_"] { position: relative; gap: 0 !important; }
 
 div[class*="st-key-apick_"] [data-testid="stElementContainer"] { position: static; margin: 0; }
 
-/* Streamlit wraps st.markdown in an internal flex row; in this nested
-   grid/flex context that wrapper can under-report its own height versus
-   its child. Forcing block layout here makes it size to content correctly. */
+
 div[class*="st-key-apick_"] [data-testid="stMarkdown"] > div { display: block !important; }
 
 div[class*="st-key-apick_"] [data-testid="stButton"] {
-    /* Streamlit's markdown wrapper can under-report its own height in this
-       nested grid/flex context, so the click target is sized generously
-       (matching the card's min-height plus room for a wrapped description
-       line) instead of trusting inset:0 to match the visible card exactly. */
+    
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 112px;
@@ -730,7 +703,7 @@ div[class*="st-key-apick_"]:hover .gs-pick--on {
     color: #fff;
 }
 
-/* Small secondary actions (Select all / Clear / Download) */
+
 div[class*="st-key-atool_"] button,
 div[class*="st-key-dl_"] button {
     min-height: 34px;
@@ -771,7 +744,7 @@ div[class*="st-key-dl_"] { display: flex; justify-content: flex-end; }
 .gs-period-note b { color:var(--gs-text); font-weight:600; }
 .gs-period-note__muted { color:var(--gs-text-3); }
 
-/* Primary call to action */
+
 div.st-key-analyze_cta button {
     min-height: 52px;
     padding: 0 26px;
@@ -796,7 +769,7 @@ div.st-key-analyze_cta button:active { transform: translateY(0); filter: brightn
 div.st-key-analyze_cta button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 div.st-key-analyze_cta button p { color: #fff !important; font-weight: 600; }
 
-/* ---------- Results ---------- */
+
 div.st-key-results { animation: gs-enter .55s var(--gs-ease) both; gap: 1rem; }
 
 @keyframes gs-enter {
@@ -849,7 +822,7 @@ div.st-key-results { animation: gs-enter .55s var(--gs-ease) both; gap: 1rem; }
     white-space: nowrap;
 }
 
-/* KPI cards */
+
 .gs-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(208px, 1fr)); gap: 14px; }
 
 .gs-kpi {
@@ -902,7 +875,7 @@ div.st-key-results { animation: gs-enter .55s var(--gs-ease) both; gap: 1rem; }
 
 .gs-kpi__hint { margin-top: 7px; font-size: 0.82rem; color: var(--gs-text-3); }
 
-/* Chart / table cards (Streamlit containers keyed "card_*") */
+
 div[class*="st-key-card_"] {
     background: var(--gs-surface);
     border: 1px solid var(--gs-border);
@@ -918,10 +891,65 @@ div[class*="st-key-card_"] {
 
 [data-testid="stPlotlyChart"] { background: transparent; }
 
-
 .gs-empty-chart { padding: 26px 8px; text-align: center; color: var(--gs-text-3); font-size: 0.9rem; }
 
-/* Insights */
+.gs-viewbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 14px 0 4px;
+}
+
+.gs-viewbar__label {
+    color: var(--gs-text-3);
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.gs-viewbar__control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gs-viewbar__control [data-testid="stRadio"] > div {
+    gap: 4px;
+}
+
+.gs-viewbar__control [data-testid="stRadio"] label {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 9px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.025);
+}
+
+.gs-viewbar__control [data-testid="stRadio"] label:has(input:checked) {
+    border-color: rgba(117,131,255,0.42);
+    background: rgba(117,131,255,0.13);
+}
+
+.gs-expand-btn button {
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.09);
+    background: rgba(255,255,255,0.035);
+    color: var(--gs-text-2);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.gs-expand-btn button:hover {
+    border-color: rgba(117,131,255,0.42);
+    color: var(--gs-text);
+    background: rgba(117,131,255,0.10);
+}
+
+
+
 .gs-insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
 .gs-insights--stack { grid-template-columns: 1fr; }
 
@@ -955,7 +983,7 @@ div[class*="st-key-card_"] {
 
 .gs-insights-title { margin: 0.3rem 0 0.1rem; font-size: 1rem; font-weight: 600; color: var(--gs-text); }
 
-/* Repository identity */
+
 .gs-repo {
     position: relative;
     display: flex;
@@ -1028,7 +1056,7 @@ div[class*="st-key-card_"] {
 .gs-chip--topic { color: #b4bcff; background: rgba(110,123,255,0.10); border-color: rgba(129,140,255,0.22); }
 .gs-chip--warn { color: #efc27e; background: rgba(227,169,79,0.10); border-color: rgba(227,169,79,0.25); }
 
-/* Notices (errors, warnings, success) */
+
 .gs-notice {
     display: flex;
     align-items: flex-start;
@@ -1087,7 +1115,7 @@ div[class*="st-key-card_"] {
 .gs-notice--success .gs-notice__icon { color: #6fd8b3; background: rgba(63,191,149,0.14); }
 .gs-notice--info    .gs-notice__icon { color: #8ec3ff; background: rgba(79,157,255,0.14); }
 
-/* Empty states */
+
 .gs-empty {
     display: flex;
     flex-direction: column;
@@ -1113,7 +1141,7 @@ div[class*="st-key-card_"] {
 .gs-empty__title { font-size: 1.05rem; font-weight: 600; color: var(--gs-text); }
 .gs-empty__msg { max-width: 56ch; font-size: 0.92rem; line-height: 1.55; color: var(--gs-text-2); }
 
-/* Loading */
+
 .gs-loader {
     padding: 22px 24px 24px;
     border-radius: 20px;
@@ -1166,7 +1194,7 @@ div[class*="st-key-card_"] {
 @keyframes gs-slide { from { transform: translateX(-110%); } to { transform: translateX(310%); } }
 @keyframes gs-shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
 
-/* Release timeline list */
+
 .gs-tl { position: relative; display: flex; flex-direction: column; gap: 18px; padding: 4px 0 4px 4px; }
 .gs-tl::before { content: ""; position: absolute; left: 10px; top: 12px; bottom: 12px; width: 1px; background: var(--gs-border-strong); }
 .gs-tl__item { position: relative; display: flex; gap: 14px; padding-left: 4px; min-width: 0; }
@@ -1202,17 +1230,11 @@ a.gs-tl__tag:hover { color: #b9c1ff; }
 .gs-pill--warn { color: #efc27e; background: rgba(227,169,79,0.12); border: 1px solid rgba(227,169,79,0.25); }
 .gs-pill--muted { color: var(--gs-text-2); background: rgba(255,255,255,0.05); border: 1px solid var(--gs-border); }
 
-/* Streamlit iframe (tables) */
+
 .stApp iframe { border: 0; border-radius: 12px; color-scheme: dark; }
 
-/* ---------- Selectbox dropdown popover ---------- */
-/* Newer Streamlit renders the open option list via react-aria in a
-   fixed-position portal (data-testid="stSelectboxVirtualDropdown")
-   appended to <body>, outside .stApp. It doesn't pick up the dark
-   theme.base the way the closed control does, so it's themed
-   explicitly here. CSS in a <style> tag applies document-wide
-   regardless of where that tag sits in the DOM, so this still reaches
-   the portal even though it's outside .stApp. */
+
+
 div[data-testid="stSelectboxVirtualDropdown"] {
     background: var(--gs-surface-3) !important;
     border: 1px solid var(--gs-border-strong) !important;
@@ -1235,7 +1257,7 @@ div[data-testid="stSelectboxVirtualDropdown"] [role="option"] * {
     color: inherit !important;
 }
 
-/* ---------- Responsive ---------- */
+
 @media (max-width: 900px) {
     [data-testid="stMainBlockContainer"], .block-container { padding: 1.5rem 1rem 4rem; }
     .gs-title { font-size: 2.05rem; }
@@ -1270,18 +1292,13 @@ def inject_styles():
         unsafe_allow_html=True
     )
 
-
-# ==============================
-# 4. Reusable UI Components
-# ==============================
-
 def hero():
 
     render_html(f"""
     <div class="gs-hero">
         <div class="gs-mark">{icon('search', 26, 2.1)}</div>
         <div>
-            <h1 class="gs-title">RepoMetric</h1>
+            <h1 class="gs-title">GitScope</h1>
             <div class="gs-subtitle">GitHub Repository Activity &amp; Collaboration Analyzer</div>
             <div class="gs-lede">
                 Point it at any public repository to pull commit activity, contributor
@@ -1461,9 +1478,84 @@ def styled_dataframe(df, column_config=None, height=None, column_order=None):
     )
 
 
-# ==============================
-# 5. Chart Helpers (one consistent Plotly theme)
-# ==============================
+@st.dialog("Expanded View", width="large")
+def expanded_view(title, fig=None, df=None, column_config=None, height=520, column_order=None):
+
+    st.markdown(f"### {esc(title)}")
+
+    if fig is not None:
+        fig.update_layout(autosize=True, height=height)
+        st.plotly_chart(
+            fig,
+            width="stretch",
+            height=height,
+            config={**PLOTLY_CONFIG, "responsive": True},
+        )
+
+    if df is not None:
+        st.dataframe(
+            df,
+            width="stretch",
+            height=height,
+            hide_index=True,
+            column_config=column_config or {},
+            column_order=column_order,
+        )
+
+
+def visual_card(key, title, subtitle, fig=None, df=None, column_config=None, height=360, column_order=None, default_view="Chart"):
+
+    with card_open(key, title, subtitle):
+
+        available = []
+        if fig is not None:
+            available.append("Chart")
+        if df is not None:
+            available.append("Table")
+
+        if not available:
+            return
+
+        if default_view not in available:
+            default_view = available[0]
+
+        control_cols = st.columns([1, 1, 5], gap="small")
+
+        with control_cols[0]:
+            st.markdown('<div class="gs-viewbar__label">View as</div>', unsafe_allow_html=True)
+
+        with control_cols[1]:
+            view = st.radio(
+                "View as",
+                available,
+                index=available.index(default_view),
+                horizontal=True,
+                key=f"{key}_view",
+                label_visibility="collapsed",
+            )
+
+        with control_cols[2]:
+            st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
+            if st.button("Expand", key=f"{key}_expand", width="content"):
+                expanded_view(
+                    title,
+                    fig=fig if view == "Chart" else None,
+                    df=df if view == "Table" else None,
+                    column_config=column_config,
+                    height=max(height, 520),
+                    column_order=column_order,
+                )
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        if view == "Chart" and fig is not None:
+            render_chart(fig)
+        elif view == "Table" and df is not None:
+            styled_dataframe(
+                df,
+                column_config=column_config,
+                height=height,
+                column_order=column_order,
+            )
 
 def _style_figure(fig, height=340, legend=True):
     """Apply the shared dark theme to any Plotly figure in place."""
@@ -1524,7 +1616,6 @@ def render_chart(fig):
     st.plotly_chart(
         fig,
         width="stretch",
-        height=340,
         config={**PLOTLY_CONFIG, "responsive": True},
     )
 
@@ -1693,11 +1784,6 @@ def releases_timeline_figure(releases_df):
 
     return _style_figure(fig, height=170, legend=False)
 
-
-# ==============================
-# 6. Section Renderers
-# ==============================
-
 def render_repository_overview(repository, owner, repo):
 
     section_header(
@@ -1787,15 +1873,32 @@ def render_commits_section(analysis):
     ])
 
     if commits_df.empty:
-
         empty_state("No commit data", "GitHub returned no commits for this repository.", "commit")
         return
 
-    with card_open("commits_trend", "Commits over time", "Daily commit counts across the fetched history."):
-        render_chart(commit_trend_figure(commits_df))
+    table = commits_df[["date", "author", "message", "sha"]].copy()
+    table["sha"] = table["sha"].astype(str).str.slice(0, 7)
+    table = table.sort_values("date", ascending=False)
+
+    commit_fig = commit_trend_figure(commits_df)
+    commit_config = {
+        "date": st.column_config.DatetimeColumn("Date", format="D MMM YYYY, HH:mm"),
+        "author": st.column_config.TextColumn("Author"),
+        "message": st.column_config.TextColumn("Message", width="large"),
+        "sha": st.column_config.TextColumn("SHA"),
+    }
+
+    visual_card(
+        "commits_activity",
+        "Commits over time",
+        "Switch between the activity chart and the commit log without leaving the section.",
+        fig=commit_fig,
+        df=table,
+        column_config=commit_config,
+        height=360,
+    )
 
     if not monthly_trend.empty:
-
         with card_open("commits_monthly", "Monthly commit activity", "Commits, active days and contributors per month."):
             render_chart(commit_monthly_figure(monthly_trend))
 
@@ -1815,7 +1918,6 @@ def render_commits_section(analysis):
     ]
 
     if monthly_metrics:
-
         insight_items.append({
             "icon": "calendar",
             "title": "Busiest month",
@@ -1826,19 +1928,6 @@ def render_commits_section(analysis):
         })
 
     insight_cards(insight_items)
-
-    with card_open("commits_table", "Commit log", f"{fmt_int(len(commits_df))} commit(s) fetched, most recent first."):
-
-        table = commits_df[["date", "author", "message", "sha"]].copy()
-        table["sha"] = table["sha"].astype(str).str.slice(0, 7)
-        table = table.sort_values("date", ascending=False)
-
-        styled_dataframe(table, column_config={
-            "date": st.column_config.DatetimeColumn("Date", format="D MMM YYYY, HH:mm"),
-            "author": st.column_config.TextColumn("Author"),
-            "message": st.column_config.TextColumn("Message", width="large"),
-            "sha": st.column_config.TextColumn("SHA"),
-        }, height=360)
 
 
 def render_contributors_section(analysis):
@@ -1861,12 +1950,29 @@ def render_contributors_section(analysis):
     ])
 
     if contributors_df.empty:
-
         empty_state("No contributor data", "GitHub returned no contributors for this repository.", "users")
         return
 
-    with card_open("contributors_chart", "Top contributors", "Contributions by user, most active first."):
-        render_chart(contributors_figure(contributors_df))
+    contributor_config = {
+        "username": st.column_config.TextColumn("Username"),
+        "contributions": st.column_config.NumberColumn("Contributions", format="%d"),
+        "contribution_percentage": st.column_config.ProgressColumn(
+            "Share",
+            format="%.2f%%",
+            min_value=0,
+            max_value=max(float(contributors_df["contribution_percentage"].max()), 1.0),
+        ),
+    }
+
+    visual_card(
+        "contributors_activity",
+        "Top contributors",
+        "Switch between the contribution chart and the full contributor table.",
+        fig=contributors_figure(contributors_df),
+        df=contributors_df,
+        column_config=contributor_config,
+        height=360,
+    )
 
     insight_cards([
         {
@@ -1882,17 +1988,6 @@ def render_contributors_section(analysis):
                          f"<strong>{format_percentage(concentration['top_3_contributor_concentration'])}</strong> of all contributions.",
         },
     ])
-
-    with card_open("contributors_table", "All contributors", f"{fmt_int(len(contributors_df))} contributor(s), ranked by contributions."):
-
-        styled_dataframe(contributors_df, column_config={
-            "username": st.column_config.TextColumn("Username"),
-            "contributions": st.column_config.NumberColumn("Contributions", format="%d"),
-            "contribution_percentage": st.column_config.ProgressColumn(
-                "Share", format="%.2f%%", min_value=0,
-                max_value=max(float(contributors_df["contribution_percentage"].max()), 1.0),
-            ),
-        }, height=360)
 
 
 def render_issues_section(analysis):
@@ -1914,47 +2009,44 @@ def render_issues_section(analysis):
     ])
 
     if issues_df.empty:
-
         empty_state("No issue data", "GitHub returned no issues for this repository.", "issue")
         return
 
-    left, right = st.columns([1, 1.35], gap="medium")
-
     state_counts = issues_df["state"].value_counts().to_dict()
+    table = issues_df.sort_values("created_at", ascending=False)
+    issue_config = {
+        "number": st.column_config.NumberColumn("#", format="%d"),
+        "title": st.column_config.TextColumn("Title", width="large"),
+        "state": st.column_config.TextColumn("State"),
+        "author": st.column_config.TextColumn("Author"),
+        "created_at": st.column_config.DatetimeColumn("Opened", format="D MMM YYYY"),
+        "closed_at": st.column_config.DatetimeColumn("Closed", format="D MMM YYYY"),
+        "comments": st.column_config.NumberColumn("Comments", format="%d"),
+    }
 
-    with left:
-        with card_open("issues_donut", "Status split", "Open versus closed issues in the fetched sample."):
-            render_chart(status_donut_figure(state_counts, {"open": THEME["warning"], "closed": THEME["success"]}))
+    visual_card(
+        "issues_activity",
+        "Issue activity",
+        "Switch between the status split and the full issue list.",
+        fig=status_donut_figure(state_counts, {"open": THEME["warning"], "closed": THEME["success"]}),
+        df=table,
+        column_config=issue_config,
+        height=360,
+    )
 
-    with right:
-
-        insight_cards([
-            {
-                "icon": "percent",
-                "title": "Closure rate",
-                "body_html": f"<strong>{format_percentage(metrics['closure_rate'])}</strong> of fetched issues have been closed.",
-            },
-            {
-                "icon": "alert",
-                "title": "Currently open",
-                "body_html": f"<strong>{fmt_int(metrics['open_issues'])}</strong> issue(s) remain open out of "
-                             f"<strong>{fmt_int(metrics['total_issues'])}</strong> fetched.",
-            },
-        ], stack=True)
-
-    with card_open("issues_table", "Issue list", f"{fmt_int(len(issues_df))} issue(s), most recent first."):
-
-        table = issues_df.sort_values("created_at", ascending=False)
-
-        styled_dataframe(table, column_config={
-            "number": st.column_config.NumberColumn("#", format="%d"),
-            "title": st.column_config.TextColumn("Title", width="large"),
-            "state": st.column_config.TextColumn("State"),
-            "author": st.column_config.TextColumn("Author"),
-            "created_at": st.column_config.DatetimeColumn("Opened", format="D MMM YYYY"),
-            "closed_at": st.column_config.DatetimeColumn("Closed", format="D MMM YYYY"),
-            "comments": st.column_config.NumberColumn("Comments", format="%d"),
-        }, height=360)
+    insight_cards([
+        {
+            "icon": "percent",
+            "title": "Closure rate",
+            "body_html": f"<strong>{format_percentage(metrics['closure_rate'])}</strong> of fetched issues have been closed.",
+        },
+        {
+            "icon": "alert",
+            "title": "Currently open",
+            "body_html": f"<strong>{fmt_int(metrics['open_issues'])}</strong> issue(s) remain open out of "
+                         f"<strong>{fmt_int(metrics['total_issues'])}</strong> fetched.",
+        },
+    ], stack=True)
 
 
 def render_pull_requests_section(analysis):
@@ -1976,47 +2068,44 @@ def render_pull_requests_section(analysis):
     ])
 
     if pr_df.empty:
-
         empty_state("No pull request data", "GitHub returned no pull requests for this repository.", "pull_request")
         return
 
-    left, right = st.columns([1, 1.35], gap="medium")
-
     state_counts = pr_df["state"].value_counts().to_dict()
+    table = pr_df.sort_values("created_at", ascending=False)
+    pr_config = {
+        "number": st.column_config.NumberColumn("#", format="%d"),
+        "title": st.column_config.TextColumn("Title", width="large"),
+        "state": st.column_config.TextColumn("State"),
+        "author": st.column_config.TextColumn("Author"),
+        "created_at": st.column_config.DatetimeColumn("Opened", format="D MMM YYYY"),
+        "merged_at": st.column_config.DatetimeColumn("Merged", format="D MMM YYYY"),
+        "closed_at": st.column_config.DatetimeColumn("Closed", format="D MMM YYYY"),
+        "comments": st.column_config.NumberColumn("Comments", format="%d"),
+    }
 
-    with left:
-        with card_open("pr_donut", "Status split", "Open versus closed pull requests (closed includes merged)."):
-            render_chart(status_donut_figure(state_counts, {"open": THEME["warning"], "closed": THEME["accent"]}))
+    visual_card(
+        "pr_activity",
+        "Pull request activity",
+        "Switch between the status split and the full pull request list.",
+        fig=status_donut_figure(state_counts, {"open": THEME["warning"], "closed": THEME["accent"]}),
+        df=table,
+        column_config=pr_config,
+        height=360,
+    )
 
-    with right:
-
-        insight_cards([
-            {
-                "icon": "merge",
-                "title": "Merge rate",
-                "body_html": f"<strong>{format_percentage(metrics['merge_rate'])}</strong> of fetched pull requests have been merged.",
-            },
-            {
-                "icon": "alert",
-                "title": "Currently open",
-                "body_html": f"<strong>{fmt_int(metrics['open_pull_requests'])}</strong> pull request(s) are still open.",
-            },
-        ], stack=True)
-
-    with card_open("pr_table", "Pull request list", f"{fmt_int(len(pr_df))} pull request(s), most recent first."):
-
-        table = pr_df.sort_values("created_at", ascending=False)
-
-        styled_dataframe(table, column_config={
-            "number": st.column_config.NumberColumn("#", format="%d"),
-            "title": st.column_config.TextColumn("Title", width="large"),
-            "state": st.column_config.TextColumn("State"),
-            "author": st.column_config.TextColumn("Author"),
-            "created_at": st.column_config.DatetimeColumn("Opened", format="D MMM YYYY"),
-            "merged_at": st.column_config.DatetimeColumn("Merged", format="D MMM YYYY"),
-            "closed_at": st.column_config.DatetimeColumn("Closed", format="D MMM YYYY"),
-            "comments": st.column_config.NumberColumn("Comments", format="%d"),
-        }, height=360)
+    insight_cards([
+        {
+            "icon": "merge",
+            "title": "Merge rate",
+            "body_html": f"<strong>{format_percentage(metrics['merge_rate'])}</strong> of fetched pull requests have been merged.",
+        },
+        {
+            "icon": "alert",
+            "title": "Currently open",
+            "body_html": f"<strong>{fmt_int(metrics['open_pull_requests'])}</strong> pull request(s) are still open.",
+        },
+    ], stack=True)
 
 
 def render_languages_section(analysis):
@@ -2030,7 +2119,6 @@ def render_languages_section(analysis):
     languages_df = analysis["languages"]
 
     if languages_df.empty:
-
         empty_state("No language data", "GitHub returned no language breakdown for this repository.", "code")
         return
 
@@ -2045,35 +2133,35 @@ def render_languages_section(analysis):
         {"label": "Total Code Size", "value": fmt_bytes(total_bytes), "icon": "package", "tone": "success"},
     ])
 
-    left, right = st.columns([1, 1.35], gap="medium")
+    language_config = {
+        "language": st.column_config.TextColumn("Language"),
+        "bytes": st.column_config.NumberColumn("Bytes", format="%d"),
+        "percentage": st.column_config.ProgressColumn("Share", format="%.2f%%", min_value=0, max_value=100),
+    }
 
-    with left:
-        with card_open("lang_pie", "Distribution", "Share of code by language, measured in bytes."):
-            render_chart(languages_figure(languages_df))
+    visual_card(
+        "languages_activity",
+        "Language distribution",
+        "Switch between the language chart and the detailed language table.",
+        fig=languages_figure(languages_df),
+        df=languages_df,
+        column_config=language_config,
+        height=360,
+    )
 
-    with right:
-
-        insight_cards([
-            {
-                "icon": "star",
-                "title": "Dominant language",
-                "body_html": f"<strong>{esc(top_row['language'])}</strong> makes up "
-                             f"<strong>{format_percentage(top_row['percentage'])}</strong> of the codebase by size.",
-            },
-            {
-                "icon": "code",
-                "title": "Language diversity",
-                "body_html": f"<strong>{polyglot_count}</strong> language(s) each account for at least 1% of the codebase.",
-            },
-        ], stack=True)
-
-    with card_open("lang_table", "Language breakdown", None):
-
-        styled_dataframe(languages_df, column_config={
-            "language": st.column_config.TextColumn("Language"),
-            "bytes": st.column_config.NumberColumn("Bytes", format="%d"),
-            "percentage": st.column_config.ProgressColumn("Share", format="%.2f%%", min_value=0, max_value=100),
-        })
+    insight_cards([
+        {
+            "icon": "star",
+            "title": "Dominant language",
+            "body_html": f"<strong>{esc(top_row['language'])}</strong> makes up "
+                         f"<strong>{format_percentage(top_row['percentage'])}</strong> of the codebase by size.",
+        },
+        {
+            "icon": "code",
+            "title": "Language diversity",
+            "body_html": f"<strong>{polyglot_count}</strong> language(s) each account for at least 1% of the codebase.",
+        },
+    ], stack=True)
 
 
 def render_releases_section(analysis, owner, repo):
@@ -2099,23 +2187,32 @@ def render_releases_section(analysis, owner, repo):
     ])
 
     if releases_df.empty:
-
         empty_state("No release data", "This repository has no published releases.", "tag")
         return
 
     ordered = releases_df.sort_values("published_at", ascending=False, na_position="last")
+    release_fig = releases_timeline_figure(releases_df)
+    release_config = {
+        "tag": st.column_config.TextColumn("Tag"),
+        "name": st.column_config.TextColumn("Name", width="medium"),
+        "author": st.column_config.TextColumn("Author"),
+        "published_at": st.column_config.DatetimeColumn("Published", format="D MMM YYYY"),
+        "draft": st.column_config.CheckboxColumn("Draft"),
+        "prerelease": st.column_config.CheckboxColumn("Pre-release"),
+    }
 
-    with card_open("releases_timeline", "Release timeline", "Published releases over time; amber marks a pre-release."):
-
-        fig = releases_timeline_figure(releases_df)
-
-        if fig is not None:
-            render_chart(fig)
-        else:
-            render_html('<div class="gs-empty-chart">No published releases with dates to plot.</div>')
+    visual_card(
+        "releases_activity",
+        "Release timeline",
+        "Switch between the release timeline and the complete release table.",
+        fig=release_fig,
+        df=ordered,
+        column_config=release_config,
+        column_order=["tag", "name", "author", "published_at", "draft", "prerelease"],
+        height=360,
+    )
 
     if has_cadence:
-
         insight_cards([
             {
                 "icon": "clock",
@@ -2158,28 +2255,6 @@ def render_releases_section(analysis, owner, repo):
     with card_open("releases_list", "Recent releases", None):
         render_html(f'<div class="gs-tl">{"".join(items)}</div>')
 
-    if len(releases_df) > 12:
-
-        with card_open("releases_table", "All releases", f"{fmt_int(len(releases_df))} release(s) fetched."):
-
-            styled_dataframe(
-                ordered,
-                column_config={
-                    "tag": st.column_config.TextColumn("Tag"),
-                    "name": st.column_config.TextColumn("Name", width="medium"),
-                    "author": st.column_config.TextColumn("Author"),
-                    "published_at": st.column_config.DatetimeColumn("Published", format="D MMM YYYY"),
-                    "draft": st.column_config.CheckboxColumn("Draft"),
-                    "prerelease": st.column_config.CheckboxColumn("Pre-release"),
-                },
-                column_order=["tag", "name", "author", "published_at", "draft", "prerelease"],
-                height=340,
-            )
-
-
-# ==============================
-# 7. Input Panel, Analysis Flow, Page Assembly
-# ==============================
 
 def init_state():
 
@@ -2287,6 +2362,7 @@ def render_control_panel():
         st.selectbox(
             "Analysis period",
             PERIOD_OPTIONS,
+            index=PERIOD_OPTIONS.index("All Time") if "All Time" in PERIOD_OPTIONS else 0,
             key="selected_period",
             label_visibility="collapsed",
         )
@@ -2383,7 +2459,7 @@ def render_error(kind, message):
         notice(
             "error",
             "GitHub API rate limit reached",
-            "RepoMetric has hit GitHub's API rate limit for this token. "
+            "GitScope has hit GitHub's API rate limit for this token. "
             "Add a GITHUB_TOKEN to raise the limit, or try again shortly.",
             detail=message,
         )
