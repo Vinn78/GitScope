@@ -1889,8 +1889,19 @@ def render_commits_section(analysis):
     )
 
     if not monthly_trend.empty:
+        monthly_fig = commit_monthly_figure(monthly_trend)
         with card_open("commits_monthly", "Monthly commit activity", "Commits, active days and contributors per month."):
-            render_chart(commit_monthly_figure(monthly_trend))
+            monthly_cols = st.columns([8, 1], gap="small")
+            with monthly_cols[1]:
+                st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
+                if st.button("Expand", key="commits_monthly_expand", width="content"):
+                    expanded_view(
+                        "Monthly commit activity",
+                        fig=monthly_fig,
+                        height=560,
+                    )
+                st.markdown('</div>', unsafe_allow_html=True)
+            render_chart(monthly_fig)
 
     insight_items = [
         {
