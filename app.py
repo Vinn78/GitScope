@@ -244,6 +244,17 @@ def compact(markup):
     return " ".join(line.strip() for line in markup.strip().splitlines() if line.strip())
 
 
+
+def table_toggle(section_key, expanded):
+    state_key = f"table_visible_{section_key}"
+    if state_key not in st.session_state:
+        st.session_state[state_key] = expanded
+    label = "⌃" if st.session_state[state_key] else "⌄"
+    if st.button(label, key=f"table_toggle_{section_key}", help="Hide or show table"):
+        st.session_state[state_key] = not st.session_state[state_key]
+        st.rerun()
+    return st.session_state[state_key]
+
 def render_html(markup):
 
     st.markdown(compact(markup), unsafe_allow_html=True)
@@ -892,6 +903,28 @@ div[class*="st-key-card_"] {
 [data-testid="stPlotlyChart"] { background: transparent; }
 
 .gs-empty-chart { padding: 26px 8px; text-align: center; color: var(--gs-text-3); font-size: 0.9rem; }
+
+.gs-table-toggle {
+    display: flex;
+    justify-content: flex-end;
+    margin: 8px 0 0;
+}
+
+.gs-table-toggle button {
+    min-height: 32px;
+    width: 32px !important;
+    padding: 0 !important;
+    border: 1px solid rgba(255,255,255,0.09) !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,0.035) !important;
+    color: var(--gs-text-2) !important;
+}
+
+.gs-table-toggle button:hover {
+    border-color: rgba(117,131,255,0.42) !important;
+    background: rgba(117,131,255,0.10) !important;
+    color: var(--gs-text) !important;
+}
 
 .gs-viewbar {
     display: flex;
