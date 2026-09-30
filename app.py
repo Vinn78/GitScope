@@ -1,5 +1,5 @@
 """
-GitScope - GitHub Repository Activity & Collaboration Analyzer
+RepoMetric - GitHub Repository Activity & Collaboration Analyzer
 ==============================================================
 
 Streamlit front end. This file only presents data: every number shown comes
@@ -32,7 +32,7 @@ import streamlit.components.v1 as components
 from github_api import PERIOD_OPTIONS, analyze_repository
 
 st.set_page_config(
-    page_title="GitScope",
+    page_title="RepoMetric",
     page_icon="🔎",
     layout="wide"
 )
@@ -1298,7 +1298,7 @@ def hero():
     <div class="gs-hero">
         <div class="gs-mark">{icon('search', 26, 2.1)}</div>
         <div>
-            <h1 class="gs-title">GitScope</h1>
+            <h1 class="gs-title">RepoMetric</h1>
             <div class="gs-subtitle">GitHub Repository Activity &amp; Collaboration Analyzer</div>
             <div class="gs-lede">
                 Point it at any public repository to pull commit activity, contributor
@@ -2459,7 +2459,7 @@ def render_error(kind, message):
         notice(
             "error",
             "GitHub API rate limit reached",
-            "GitScope has hit GitHub's API rate limit for this token. "
+            "RepoMetric has hit GitHub's API rate limit for this token. "
             "Add a GITHUB_TOKEN to raise the limit, or try again shortly.",
             detail=message,
         )
