@@ -923,6 +923,51 @@ div[class*="st-key-card_"] {
     color: var(--gs-text) !important;
 }
 
+div[class*="st-key-table-collapsed-"] {
+    background: var(--gs-surface);
+    border: 1px solid var(--gs-border);
+    border-radius: 12px;
+    padding: 7px 10px;
+    box-shadow: var(--gs-shadow);
+    min-width: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+div[class*="st-key-table-collapsed-"] [data-testid="stHorizontalBlock"] {
+    align-items: center;
+    gap: 8px;
+}
+
+div[class*="st-key-table-collapsed-"] [data-testid="stMarkdownContainer"] {
+    padding: 0;
+}
+
+.gs-collapsed-table-title {
+    color: var(--gs-text);
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 32px;
+}
+
+div[class*="st-key-table-collapsed-"] button {
+    min-height: 32px !important;
+    height: 32px !important;
+    width: 32px !important;
+    padding: 0 !important;
+    border: 1px solid rgba(255,255,255,0.09) !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,0.035) !important;
+    color: var(--gs-text-2) !important;
+    font-size: 15px !important;
+}
+
+div[class*="st-key-table-collapsed-"] button:hover {
+    border-color: rgba(117,131,255,0.42) !important;
+    background: rgba(117,131,255,0.10) !important;
+    color: var(--gs-text) !important;
+}
+
 .gs-expand-btn button {
     min-height: 34px;
     padding: 0 12px;
@@ -1518,34 +1563,45 @@ def visual_card(key, title, subtitle, fig=None, df=None, column_config=None, hei
 
         table_visible = st.session_state[table_state_key]
 
-        with card_open(f"{key}_table", f"{title} table", "Detailed data for this analysis."):
-            table_action_cols = st.columns([1, 0.08, 0.08], gap="small")
-
-            with table_action_cols[1]:
-                st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
-                if st.button("Expand", key=f"{key}_table_expand", width="stretch"):
-                    expanded_view(
-                        f"{title} table",
-                        df=df,
-                        column_config=column_config,
-                        height=max(height, 520),
-                        column_order=column_order,
+        if not table_visible:
+            with st.container(key=f"table-collapsed-{key}"):
+                collapsed_cols = st.columns([1, 0.05], gap="small", vertical_alignment="center")
+                with collapsed_cols[0]:
+                    st.markdown(
+                        f'<div class="gs-collapsed-table-title">{esc(title)} table</div>',
+                        unsafe_allow_html=True,
                     )
-                st.markdown('</div>', unsafe_allow_html=True)
+                with collapsed_cols[1]:
+                    if st.button("⌄", key=f"{key}_table_toggle", width="stretch"):
+                        st.session_state[table_state_key] = True
+                        st.rerun()
+        else:
+            with card_open(f"{key}_table", f"{title} table", "Detailed data for this analysis."):
+                table_action_cols = st.columns([1, 0.08, 0.08], gap="small")
 
-            with table_action_cols[2]:
-                st.markdown('<div class="gs-table-toggle">', unsafe_allow_html=True)
-                if st.button(
-                    "⌃" if table_visible else "⌄",
-                    key=f"{key}_table_toggle",
-                    help="Hide table" if table_visible else "Show table",
-                    width="stretch",
-                ):
-                    st.session_state[table_state_key] = not table_visible
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+                with table_action_cols[1]:
+                    st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
+                    if st.button("Expand", key=f"{key}_table_expand", width="stretch"):
+                        expanded_view(
+                            f"{title} table",
+                            df=df,
+                            column_config=column_config,
+                            height=max(height, 520),
+                            column_order=column_order,
+                        )
+                    st.markdown('</div>', unsafe_allow_html=True)
 
-            if table_visible:
+                with table_action_cols[2]:
+                    st.markdown('<div class="gs-table-toggle">', unsafe_allow_html=True)
+                    if st.button(
+                        "⌃",
+                        key=f"{key}_table_toggle",
+                        width="stretch",
+                    ):
+                        st.session_state[table_state_key] = False
+                        st.rerun()
+                    st.markdown('</div>', unsafe_allow_html=True)
+
                 styled_dataframe(
                     df,
                     column_config=column_config,
