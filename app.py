@@ -245,16 +245,6 @@ def compact(markup):
 
 
 
-def table_toggle(section_key, expanded):
-    state_key = f"table_visible_{section_key}"
-    if state_key not in st.session_state:
-        st.session_state[state_key] = expanded
-    label = "⌃" if st.session_state[state_key] else "⌄"
-    if st.button(label, key=f"table_toggle_{section_key}", help="Hide or show table"):
-        st.session_state[state_key] = not st.session_state[state_key]
-        st.rerun()
-    return st.session_state[state_key]
-
 def render_html(markup):
 
     st.markdown(compact(markup), unsafe_allow_html=True)
@@ -906,62 +896,25 @@ div[class*="st-key-card_"] {
 
 .gs-table-toggle {
     display: flex;
-    justify-content: flex-end;
-    margin: 8px 0 0;
+    justify-content: flex-start;
+    margin: 0;
 }
 
 .gs-table-toggle button {
-    min-height: 32px;
-    width: 32px !important;
+    min-height: 34px !important;
+    width: 34px !important;
     padding: 0 !important;
     border: 1px solid rgba(255,255,255,0.09) !important;
-    border-radius: 8px !important;
+    border-radius: 9px !important;
     background: rgba(255,255,255,0.035) !important;
     color: var(--gs-text-2) !important;
+    font-size: 15px !important;
 }
 
 .gs-table-toggle button:hover {
     border-color: rgba(117,131,255,0.42) !important;
     background: rgba(117,131,255,0.10) !important;
     color: var(--gs-text) !important;
-}
-
-.gs-viewbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 14px 0 4px;
-}
-
-.gs-viewbar__label {
-    color: var(--gs-text-3);
-    font-size: 0.76rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-.gs-viewbar__control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.gs-viewbar__control [data-testid="stRadio"] > div {
-    gap: 4px;
-}
-
-.gs-viewbar__control [data-testid="stRadio"] label {
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 9px;
-    padding: 4px 10px;
-    background: rgba(255,255,255,0.025);
-}
-
-.gs-viewbar__control [data-testid="stRadio"] label:has(input:checked) {
-    border-color: rgba(117,131,255,0.42);
-    background: rgba(117,131,255,0.13);
 }
 
 .gs-expand-btn button {
@@ -1538,57 +1491,61 @@ def expanded_view(title, fig=None, df=None, column_config=None, height=520, colu
 
 def visual_card(key, title, subtitle, fig=None, df=None, column_config=None, height=360, column_order=None, default_view="Chart"):
 
-    with card_open(key, title, subtitle):
+    if fig is not None:
+        with card_open(f"{key}_chart", title, subtitle):
+            chart_cols = st.columns([8, 1], gap="small")
+            with chart_cols[1]:
+                st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
+                if st.button("Expand", key=f"{key}_chart_expand", width="content"):
+                    expanded_view(
+                        title,
+                        fig=fig,
+                        height=max(height, 520),
+                    )
+                st.markdown('</div>', unsafe_allow_html=True)
+            render_chart(fig)
 
-        available = []
-        if fig is not None:
-            available.append("Chart")
-        if df is not None:
-            available.append("Table")
+    if df is not None:
+        table_state_key = f"table_visible_{key}"
+        if table_state_key not in st.session_state:
+            st.session_state[table_state_key] = True
 
-        if not available:
-            return
+        table_visible = st.session_state[table_state_key]
 
-        if default_view not in available:
-            default_view = available[0]
+        with card_open(f"{key}_table", f"{title} table", "Detailed data for this analysis."):
+            table_cols = st.columns([8, 1, 1], gap="small")
 
-        control_cols = st.columns([1, 1, 5], gap="small")
+            with table_cols[1]:
+                st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
+                if st.button("Expand", key=f"{key}_table_expand", width="content"):
+                    expanded_view(
+                        f"{title} table",
+                        df=df,
+                        column_config=column_config,
+                        height=max(height, 520),
+                        column_order=column_order,
+                    )
+                st.markdown('</div>', unsafe_allow_html=True)
 
-        with control_cols[0]:
-            st.markdown('<div class="gs-viewbar__label">View as</div>', unsafe_allow_html=True)
+            with table_cols[2]:
+                st.markdown('<div class="gs-table-toggle">', unsafe_allow_html=True)
+                if st.button(
+                    "⌃" if table_visible else "⌄",
+                    key=f"{key}_table_toggle",
+                    help="Hide table" if table_visible else "Show table",
+                    width="content",
+                ):
+                    st.session_state[table_state_key] = not table_visible
+                    st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
 
-        with control_cols[1]:
-            view = st.radio(
-                "View as",
-                available,
-                index=available.index(default_view),
-                horizontal=True,
-                key=f"{key}_view",
-                label_visibility="collapsed",
-            )
-
-        with control_cols[2]:
-            st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
-            if st.button("Expand", key=f"{key}_expand", width="content"):
-                expanded_view(
-                    title,
-                    fig=fig if view == "Chart" else None,
-                    df=df if view == "Table" else None,
+            if table_visible:
+                styled_dataframe(
+                    df,
                     column_config=column_config,
-                    height=max(height, 520),
+                    height=height,
                     column_order=column_order,
                 )
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        if view == "Chart" and fig is not None:
-            render_chart(fig)
-        elif view == "Table" and df is not None:
-            styled_dataframe(
-                df,
-                column_config=column_config,
-                height=height,
-                column_order=column_order,
-            )
 
 def _style_figure(fig, height=340, legend=True):
     """Apply the shared dark theme to any Plotly figure in place."""
@@ -1924,7 +1881,7 @@ def render_commits_section(analysis):
     visual_card(
         "commits_activity",
         "Commits over time",
-        "Switch between the activity chart and the commit log without leaving the section.",
+        "Commit activity over time and the detailed commit log.",
         fig=commit_fig,
         df=table,
         column_config=commit_config,
@@ -2000,7 +1957,7 @@ def render_contributors_section(analysis):
     visual_card(
         "contributors_activity",
         "Top contributors",
-        "Switch between the contribution chart and the full contributor table.",
+        "Contribution distribution and the detailed contributor table.",
         fig=contributors_figure(contributors_df),
         df=contributors_df,
         column_config=contributor_config,
@@ -2060,7 +2017,7 @@ def render_issues_section(analysis):
     visual_card(
         "issues_activity",
         "Issue activity",
-        "Switch between the status split and the full issue list.",
+        "Issue status distribution and the detailed issue table.",
         fig=status_donut_figure(state_counts, {"open": THEME["warning"], "closed": THEME["success"]}),
         df=table,
         column_config=issue_config,
@@ -2120,7 +2077,7 @@ def render_pull_requests_section(analysis):
     visual_card(
         "pr_activity",
         "Pull request activity",
-        "Switch between the status split and the full pull request list.",
+        "Pull request status distribution and the detailed pull request table.",
         fig=status_donut_figure(state_counts, {"open": THEME["warning"], "closed": THEME["accent"]}),
         df=table,
         column_config=pr_config,
@@ -2175,7 +2132,7 @@ def render_languages_section(analysis):
     visual_card(
         "languages_activity",
         "Language distribution",
-        "Switch between the language chart and the detailed language table.",
+        "Language distribution and the detailed language table.",
         fig=languages_figure(languages_df),
         df=languages_df,
         column_config=language_config,
@@ -2237,7 +2194,7 @@ def render_releases_section(analysis, owner, repo):
     visual_card(
         "releases_activity",
         "Release timeline",
-        "Switch between the release timeline and the complete release table.",
+        "Release timeline and the complete release table.",
         fig=release_fig,
         df=ordered,
         column_config=release_config,
