@@ -896,7 +896,13 @@ div[class*="st-key-card_"] {
 
 .gs-table-toggle {
     display: flex;
-    justify-content: flex-start;
+    justify-content: flex-end;
+    margin: 0;
+}
+
+.gs-expand-btn {
+    display: flex;
+    justify-content: flex-end;
     margin: 0;
 }
 
@@ -1493,10 +1499,10 @@ def visual_card(key, title, subtitle, fig=None, df=None, column_config=None, hei
 
     if fig is not None:
         with card_open(f"{key}_chart", title, subtitle):
-            chart_cols = st.columns([8, 1], gap="small")
-            with chart_cols[1]:
+            chart_action_cols = st.columns([1, 0.12], gap="small")
+            with chart_action_cols[1]:
                 st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
-                if st.button("Expand", key=f"{key}_chart_expand", width="content"):
+                if st.button("Expand", key=f"{key}_chart_expand", width="stretch"):
                     expanded_view(
                         title,
                         fig=fig,
@@ -1508,16 +1514,16 @@ def visual_card(key, title, subtitle, fig=None, df=None, column_config=None, hei
     if df is not None:
         table_state_key = f"table_visible_{key}"
         if table_state_key not in st.session_state:
-            st.session_state[table_state_key] = True
+            st.session_state[table_state_key] = False
 
         table_visible = st.session_state[table_state_key]
 
         with card_open(f"{key}_table", f"{title} table", "Detailed data for this analysis."):
-            table_cols = st.columns([8, 1, 1], gap="small")
+            table_action_cols = st.columns([1, 0.08, 0.08], gap="small")
 
-            with table_cols[1]:
+            with table_action_cols[1]:
                 st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
-                if st.button("Expand", key=f"{key}_table_expand", width="content"):
+                if st.button("Expand", key=f"{key}_table_expand", width="stretch"):
                     expanded_view(
                         f"{title} table",
                         df=df,
@@ -1527,13 +1533,13 @@ def visual_card(key, title, subtitle, fig=None, df=None, column_config=None, hei
                     )
                 st.markdown('</div>', unsafe_allow_html=True)
 
-            with table_cols[2]:
+            with table_action_cols[2]:
                 st.markdown('<div class="gs-table-toggle">', unsafe_allow_html=True)
                 if st.button(
                     "⌃" if table_visible else "⌄",
                     key=f"{key}_table_toggle",
                     help="Hide table" if table_visible else "Show table",
-                    width="content",
+                    width="stretch",
                 ):
                     st.session_state[table_state_key] = not table_visible
                     st.rerun()
@@ -1891,10 +1897,10 @@ def render_commits_section(analysis):
     if not monthly_trend.empty:
         monthly_fig = commit_monthly_figure(monthly_trend)
         with card_open("commits_monthly", "Monthly commit activity", "Commits, active days and contributors per month."):
-            monthly_cols = st.columns([8, 1], gap="small")
-            with monthly_cols[1]:
+            monthly_action_cols = st.columns([1, 0.12], gap="small")
+            with monthly_action_cols[1]:
                 st.markdown('<div class="gs-expand-btn">', unsafe_allow_html=True)
-                if st.button("Expand", key="commits_monthly_expand", width="content"):
+                if st.button("Expand", key="commits_monthly_expand", width="stretch"):
                     expanded_view(
                         "Monthly commit activity",
                         fig=monthly_fig,
